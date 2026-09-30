@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+class Solution {
+public:
+    int longestCommonSubsequence(std::string text1, std::string text2) {
+        int m = text1.size();
+        int n = text2.size();
+
+        // dp[j] stores LCS length for text1 up to current char and text2 up to index j
+        std::vector<int> dp(n + 1, 0);
+
+        for (int i = 1; i <= m; ++i) {
+            int prev = 0; 
+            for (int j = 1; j <= n; ++j) {
+                int temp = dp[j]; 
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[j] = prev + 1;
+                } else {
+                    dp[j] = std::max(dp[j], dp[j - 1]);
+                }
+                prev = temp;
+            }
+        }
+
+        return dp[n];
+    }
+};
+
+int main() {
+    Solution sol;
+    std::string text1 = "abcde";
+    std::string text2 = "ace";
+
+    std::cout << "Longest Common Subsequence length: " 
+              << sol.longestCommonSubsequence(text1, text2) << std::endl; 
+
+    return 0;
+}
