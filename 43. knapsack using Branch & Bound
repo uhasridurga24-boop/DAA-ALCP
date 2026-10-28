@@ -1,0 +1,91 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+struct Item {
+    int weight;
+    int value;
+};
+struct Node {
+    int level;   
+    int profit;   
+    int weight;   
+    float bound; 
+};
+bool cmp(const Item& a, const Item& b) {
+    double r1 = (double)a.value / a.weight;
+    double r2 = (double)b.value / b.weight;
+    return r1 > r2;
+}
+float calculateBound(Node u, int n, int W, const vector<Item>& arr) {
+    if (u.weight >= W)
+        return 0;
+
+    float profitBound = u.profit;
+    int j = u.level + 1;
+    int totalWeight = u.weight;
+    while (j < n && totalWeight + arr[j].weight <= W) {
+        totalWeight += arr[j].weight;
+        profitBound += arr[j].value;
+        j++;
+    }
+    if (j < n)
+        profitBound += (W - totalWeight) * ((float)arr[j].value / arr[j].weight);
+
+    return profitBound;
+}
+int knapsack(int W, vector<Item>& arr) {
+    int n = arr.size();
+    sort(arr.begin(), arr.end(), cmp);
+    auto compare = [](const Node& a, const Node& b) {
+        return a.bound < b.bound;
+    };
+    priority_queue<Node, vector<Node>, decltype(compare)> pq(compare);
+
+    Node u, v;
+    u.level = -1;
+    u.profit = u.weight = 0;
+    u.bound = calculateBound(u, n, W, arr);
+    
+    pq.push(u);
+    int maxProfit = 0;
+
+    while (!pq.empty()) {
+        u = pq.top();
+        pq.pop();
+        if (u.bound > maxProfit) {
+            // Move to the next item
+            v.level = u.level + 1;
+            v.weight = u.weight + arr[v.level].weight;
+            v.profit = u.profit + arr[v.level].value;
+            if (v.weight <= W && v.profit > maxProfit)
+                maxProfit = v.profit;
+            v.bound = calculateBound(v, n, W, arr);
+            if (v.bound > maxProfit)
+                pq.push(v);
+            v.weight = u.weight;
+            v.profit = u.profit;
+            v.bound = calculateBound(v, n, W, arr);
+            if (v.bound > maxProfit)
+                pq.push(v);
+        }
+    }
+
+    return maxProfit;
+}
+
+int main() {
+    int W = 50; 
+    vector<Item> arr = {
+        {10, 60},
+        {20, 100},
+        {30, 120}
+    };
+
+    int maxProfit = knapsack(W, arr);
+    cout << "Maximum Profit: " << maxProfit << endl;
+
+    return 0;
+}
