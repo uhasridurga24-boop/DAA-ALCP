@@ -1,0 +1,27 @@
+class Solution {
+public:
+    std::vector<std::vector<int>> combinationSum(std::vector<int>& candidates, int target) {
+        std::vector<std::vector<int>> result;
+        std::vector<int> current;
+        std::sort(candidates.begin(), candidates.end());
+        backtrack(0, target, candidates, current, result);
+        return result;
+    }
+
+private:
+    void backtrack(int startIndex, int remainingTarget, const std::vector<int>& candidates,
+                   std::vector<int>& current, std::vector<std::vector<int>>& result) {
+        if (remainingTarget == 0) {
+            result.push_back(current);
+            return;
+        }
+        for (int i = startIndex; i < candidates.size(); ++i) {
+            if (candidates[i] > remainingTarget) {
+                break;
+            }
+            current.push_back(candidates[i]);
+            backtrack(i, remainingTarget - candidates[i], candidates, current, result);
+            current.pop_back();
+        }
+    }
+};
