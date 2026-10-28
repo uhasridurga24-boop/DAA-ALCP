@@ -1,0 +1,62 @@
+#include <vector>
+#include <queue>
+#include <unordered_set>
+
+class Solution {
+    typedef long long ll;
+    const int MAX = 1000000;
+    const int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+    ll encode(int x, int y) {
+        return ((ll)x * MAX) + y;
+    }
+
+public:
+    bool isEscapePossible(std::vector<std::vector<int>>& blocked, std::vector<int>& source, std::vector<int>& target) {
+        std::unordered_set<ll> blocked_set;
+        for (const auto& b : blocked) {
+            blocked_set.insert(encode(b[0], b[1]));
+        }
+        return bfs(source, target, blocked_set) && bfs(target, source, blocked_set);
+    }
+
+private:
+    bool bfs(const std::vector<int>& start, const std::vector<int>& end, const std::unordered_set<ll>& blocked_set) {
+        std::unordered_set<ll> visited;
+        std::queue<std::pair<int, int>> q;
+        
+        q.push({start[0], start[1]});
+        visited.insert(encode(start[0], start[1]));
+
+        ll target_code = encode(end[0], end[1]);
+        int n = blocked_set.size();
+        int limit = (n * (n - 1)) / 2; 
+
+        while (!q.empty()) {
+            auto [x, y] = q.front();
+            q.pop();
+
+            if (encode(x, y) == target_code) {
+                return true;
+            }
+
+            for (const auto& d : dirs) {
+                int nx = x + d[0];
+                int ny = y + d[1];
+
+                if (nx >= 0 && nx < MAX && ny >= 0 && ny < MAX) {
+                    ll ncode = encode(nx, ny);
+                    if (blocked_set.find(ncode) == blocked_set.end() && visited.find(ncode) == visited.end()) {
+                        visited.insert(ncode);
+                        q.push({nx, ny});
+                        if (visited.size() > limit) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return visited.size() > limit;
+    }
+};
